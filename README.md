@@ -1,1 +1,0 @@
-# Plastic-trash-for-environment
