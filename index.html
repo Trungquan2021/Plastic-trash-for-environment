@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1">
+  <title>Plastic Trash for Environment</title>
+  <meta name="theme-color" content="#16a34a">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@600;700;800&family=Quicksand:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@4.20.0/dist/tf.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@tensorflow-models/coco-ssd"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@tensorflow-models/mobilenet"></script>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div id="splash" class="screen active">
+    <div class="splash-box">
+      <div class="splash-logo">🌿 Plastic Trash for Environment</div>
+      <div class="splash-sub">Bản GitHub Pages: camera + video + AI scan + puzzle</div>
+      <div class="splash-status"><span class="spinner"></span><span id="splashText">Đang khởi tạo giao diện...</span></div>
+    </div>
+  </div>
+
+  <div id="app" class="screen hidden active">
+    <header class="topbar">
+      <div class="brand">
+        <div class="brand-badge">♻️</div>
+        <div>
+          <div class="brand-title">PlasticFree</div>
+          <div class="brand-sub">QR bin → chụp hoặc quay → AI duyệt → +1 puzzle</div>
+        </div>
+      </div>
+      <div class="top-stats">
+        <div class="pill">🧩 <span id="topPuzzle">0</span></div>
+        <div class="pill">✅ <span id="topVerified">0</span></div>
+      </div>
+    </header>
+
+    <main class="page-wrap">
+      <section class="page active" id="page-home">
+        <div class="hero">
+          <div class="badge">🌍 GitHub-ready • Không cần backend</div>
+          <h1>Quét AI mạnh hơn,<br>thêm quay video, bỏ tải ảnh lên.</h1>
+          <p>Người dùng quét QR trên thùng rác để vào trang. Tại đây họ có thể mở camera, chụp ảnh hoặc quay video hành động bỏ rác đúng nơi quy định. AI trên trình duyệt sẽ nhận diện vật thể, đánh giá chất lượng khung hình và quyết định có cộng mảnh ghép hay không.</p>
+          <div class="hero-actions">
+            <button class="btn btn-primary" data-go="scan">📷 Mở khu vực quét</button>
+            <button class="btn btn-secondary" data-go="history">🎬 Xem video đã lưu</button>
+          </div>
+        </div>
+
+        <div class="grid stats-grid">
+          <div class="stat-card"><div class="value" id="statPuzzle">0</div><div class="label">Tổng mảnh ghép</div></div>
+          <div class="stat-card"><div class="value" id="statPhoto">0</div><div class="label">Ảnh đã duyệt</div></div>
+          <div class="stat-card"><div class="value" id="statVideo">0</div><div class="label">Video đã duyệt</div></div>
+          <div class="stat-card"><div class="value" id="statHistory">0</div><div class="label">Lịch sử</div></div>
+        </div>
+
+        <div class="section-title"><h2>🤖 Trạng thái AI</h2><span class="badge" id="aiReadyBadge">Đang tải model...</span></div>
+        <div class="card">
+          <div class="small" id="aiReadyText">Hệ thống đang tải COCO-SSD và MobileNet để nhận diện nhiều vật thể xung quanh, nhận diện bối cảnh thùng rác và chấm điểm khung hình.</div>
+          <div class="objects mt12" id="capabilityTags">
+            <div class="object-pill">Thùng rác / khu vực bỏ rác</div>
+            <div class="object-pill">Chai, ly, cốc, hộp</div>
+            <div class="object-pill">Người / hành động</div>
+            <div class="object-pill">Video nhiều khung hình</div>
+            <div class="object-pill">So trùng media</div>
+            <div class="object-pill">Độ sáng / độ nét</div>
+          </div>
+        </div>
+
+        <div class="section-title"><h2>✨ Bản này đã thay đổi</h2></div>
+        <div class="tips">
+          <div class="tip"><h4>📷 Chỉ còn camera</h4><p>Đã bỏ hoàn toàn tải ảnh lên. Trải nghiệm bây giờ bám sát thực tế của mô hình QR trên thùng rác.</p></div>
+          <div class="tip"><h4>🎥 Quay video có quét</h4><p>Video được cắt thành nhiều khung hình, quét nhiều lần và kiểm tra chuyển động để tăng độ tin cậy.</p></div>
+          <div class="tip"><h4>🧠 Nhận diện rộng hơn</h4><p>AI hiển thị thêm nhiều vật thể và nhãn khung cảnh xung quanh để bạn dễ kiểm tra điều nó thực sự nhìn thấy.</p></div>
+        </div>
+
+        <div class="section-title"><h2>💡 Gợi ý công bằng đổi thưởng</h2></div>
+        <div class="card">
+          <div class="small">Giai đoạn này bạn có thể test tính năng không cần tài khoản. Nhưng khi chuyển sang đổi thưởng thật, nên dùng tài khoản ở bước 2. Cách hợp lý nhất là: mỗi QR thùng rác có mã riêng, mỗi lượt gửi sinh ra một mã lượt quét, mỗi tài khoản chỉ được cộng điểm khi video/ảnh hợp lệ và không trùng. Có thể thêm xác minh bằng số điện thoại hoặc email OTP để đổi thưởng công bằng hơn.</div>
+        </div>
+      </section>
+
+      <section class="page" id="page-scan">
+        <div class="section-title">
+          <h2>📷 Khu vực quét AI</h2>
+          <span class="badge" id="modeBadge">Chế độ: Chụp ảnh</span>
+        </div>
+        <div class="scan-shell">
+          <div class="grid">
+            <div class="card preview-card">
+              <div class="mode-tabs">
+                <button class="mode-btn active" data-mode="photo">📷 Chụp ảnh</button>
+                <button class="mode-btn" data-mode="video">🎥 Quay video</button>
+              </div>
+              <div class="preview-stage" id="previewStage">
+                <div class="preview-empty" id="previewEmpty">
+                  <div class="preview-empty-icon">🗑️</div>
+                  <div>Mở camera rồi chụp ảnh hoặc quay video.<br>AI sẽ ưu tiên nội dung thấy rõ thùng rác và vật thể bỏ đi.</div>
+                </div>
+                <video id="liveVideo" playsinline class="hidden"></video>
+                <img id="photoPreview" alt="preview" class="hidden">
+                <video id="videoPreview" playsinline controls class="hidden"></video>
+                <canvas id="drawLayer" class="hidden"></canvas>
+              </div>
+              <div class="live-chip-row" id="liveChips"></div>
+              <div class="controls">
+                <button class="btn btn-green" id="btnOpenCamera">📷 Mở camera</button>
+                <button class="btn btn-blue" id="btnCapture" disabled>🔵 Chụp ảnh</button>
+                <button class="btn btn-outline hidden" id="btnStartRecord" disabled>🎥 Bắt đầu quay</button>
+                <button class="btn btn-outline hidden" id="btnStopRecord" disabled>⏹️ Dừng quay</button>
+                <button class="btn btn-outline hidden" id="btnDownloadCurrent">⬇️ Tải video hiện tại</button>
+                <button class="btn btn-primary" id="btnAnalyze" disabled>🤖 Quét & chấm điểm</button>
+                <button class="btn btn-outline" id="btnResetMedia">♻️ Làm mới</button>
+              </div>
+              <div class="notice" id="cameraNotice">Lưu ý: camera trình duyệt hoạt động tốt trên HTTPS. Khi đưa lên GitHub Pages hoặc domain riêng có HTTPS, camera sẽ dùng được trên điện thoại.</div>
+            </div>
+          </div>
+
+          <div class="grid">
+            <div class="card result-card">
+              <div class="result-head">
+                <div>
+                  <div class="result-status" id="resultStatus">Chưa quét</div>
+                  <div class="small" id="resultMeta">Chụp ảnh hoặc quay video rồi bấm “Quét & chấm điểm”.</div>
+                </div>
+                <div class="result-score" id="resultScore">Điểm 0/100</div>
+              </div>
+              <div class="result-summary" id="resultSummary">Kết quả sẽ cho biết có thấy thùng rác rõ hay không, có vật thể phù hợp hay không, chất lượng khung hình, chuyển động video và mức độ trùng lặp media.</div>
+              <div class="criteria" id="criteriaBox"></div>
+              <div class="objects" id="detectedObjects"></div>
+              <div class="metric-row" id="metricBox"></div>
+            </div>
+
+            <div class="card">
+              <div class="section-title inner"><h2>📌 Mẹo để được duyệt</h2></div>
+              <div class="bullets">
+                <div><span>1</span><div>Đưa thùng rác vào khung hình rõ ràng, càng nổi bật càng tốt.</div></div>
+                <div><span>2</span><div>Để rác hoặc vật thể bỏ đi xuất hiện gần thùng rác, không chụp quá xa.</div></div>
+                <div><span>3</span><div>Video nên có hành động rõ ràng: đưa vật thể lại gần, thả vào thùng, rồi lia máy một chút.</div></div>
+                <div><span>4</span><div>Không dùng cùng một ảnh hoặc video nhiều lần vì hệ thống sẽ chặn nội dung trùng.</div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="page" id="page-puzzle">
+        <div class="section-title"><h2>🧩 Tranh ghép môi trường xanh</h2><span class="badge" id="puzzleBadge">0 mảnh</span></div>
+        <div class="puzzle-wrap">
+          <div class="card puzzle-card">
+            <div class="puzzle-tabs">
+              <button class="puzzle-tab active" data-level="1">Level 1 · 15 mảnh</button>
+              <button class="puzzle-tab" data-level="2">Level 2 · 35 mảnh</button>
+              <button class="puzzle-tab" data-level="3">Level 3 · 50 mảnh</button>
+            </div>
+            <svg id="puzzleSvg" viewBox="0 0 600 600" aria-label="Puzzle scene"></svg>
+            <div class="progress"><div id="puzzleProgressBar" style="width:0%"></div></div>
+            <div class="small mt12" id="puzzleText">0 / 15 mảnh</div>
+          </div>
+          <div class="grid rewards">
+            <div class="reward"><strong>🌱 Level 1</strong><p>Hoàn thiện nền cỏ, cây nhỏ và lối đi đầu tiên.</p></div>
+            <div class="reward"><strong>🌤️ Level 2</strong><p>Mở thêm bầu trời, công viên xanh và khu thùng rác sạch đẹp.</p></div>
+            <div class="reward"><strong>🌏 Level 3</strong><p>Hoàn thiện toàn cảnh môi trường sống xanh và thành phố sạch.</p></div>
+          </div>
+        </div>
+      </section>
+
+      <section class="page" id="page-history">
+        <div class="section-title"><h2>🕘 Lịch sử quét</h2><span class="badge" id="historyBadge">0 lượt</span></div>
+        <div class="history-list" id="historyList"></div>
+      </section>
+
+      <section class="page" id="page-settings">
+        <div class="section-title"><h2>⚙️ Dữ liệu cục bộ</h2></div>
+        <div class="guide-grid">
+          <div class="card">
+            <h3>📦 Sao lưu dữ liệu</h3>
+            <p class="small">Xuất toàn bộ tiến trình, lịch sử, puzzle và dấu vân tay media dưới dạng JSON để sao lưu hoặc chuyển thiết bị.</p>
+            <div class="controls single">
+              <button class="btn btn-outline" id="btnExportData">⬇️ Xuất dữ liệu JSON</button>
+            </div>
+          </div>
+          <div class="card">
+            <h3>♻️ Làm mới toàn bộ</h3>
+            <p class="small">Xóa lịch sử, xóa puzzle, xóa dấu vân tay media và xóa luôn video đã lưu trên thiết bị hiện tại.</p>
+            <div class="controls single">
+              <button class="btn btn-outline danger" id="btnResetAll">🗑️ Reset toàn bộ</button>
+            </div>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <nav class="footer-nav">
+      <button class="nav-btn active" data-go="home">🏠<span>Trang chủ</span></button>
+      <button class="nav-btn" data-go="scan">📷<span>Quét</span></button>
+      <button class="nav-btn" data-go="puzzle">🧩<span>Puzzle</span></button>
+      <button class="nav-btn" data-go="history">🎬<span>Lịch sử</span></button>
+      <button class="nav-btn" data-go="settings">⚙️<span>Dữ liệu</span></button>
+    </nav>
+  </div>
+
+  <div class="toast" id="toast"></div>
+  <script src="app.js"></script>
+</body>
+</html>
